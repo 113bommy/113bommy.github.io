@@ -176,6 +176,21 @@ compress_html:
   ignore:
     envs: [development]
 
+pugins:
+  - parallel
+  - rainbow
+  - yell
+  - html-proofer
+  - sass-embedded
+  - jekyll-sass-converter
+  - rexml
+  - kramdown
+  - rouge
+  - unicode-display_width
+  - terminal-table
+  - webrick
+  - jekyll
+  - jekyll-archives
 exclude:
   - "*.gem"
   - "*.gemspec"
