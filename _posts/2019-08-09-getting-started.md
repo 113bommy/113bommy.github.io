@@ -2,7 +2,7 @@
 title: Getting Started
 author: cotes
 date: 2019-08-09 20:55:00 +0800
-categories: [EEE(soph), Tutorial]
+categories: [Deep Learning, Deep Learning with Python]
 tags: [getting started]
 pin: true
 img_path: '/posts/20180809'
