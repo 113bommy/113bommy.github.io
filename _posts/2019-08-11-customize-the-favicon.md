@@ -2,7 +2,7 @@
 title: Customize the Favicon
 author: cotes
 date: 2019-08-11 00:34:00 +0800
-categories: [EEE(soph), Tutorial]
+categories: [Deep Learning, 혼공머신]
 tags: [favicon]
 ---
 
