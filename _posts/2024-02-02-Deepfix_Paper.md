@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Deepfix_Paper"
-date:   2024-02-02 22:10:00 +0900
+date:   2024-02-02 00:10:00 +0900
 categories: [Machine Learning, Code Fix]
 ---
 #### DEEPFIX 논문 정리
