@@ -10,7 +10,7 @@ categories: [Machine Learning, Code Fix]
 
 아래 PDF는 erroneous code 자동 수정의 baseline에 해당하는 Deepfix에 대해 Breaker와 Fixer의 아이디어를 활용하여 실제 erroneous data의 분포와 유사한 분포를 가진 training data를 생성하고, 해당 data를 활용하여 모델을 학습시킨 Break-it-fix-it 논문을 읽고 정리한 내용이다.
 
-[BIFI정리](../assets/pdf/BIFI_study.pdf)
+[BIFI정리](/assets/pdf/BIFI_study.pdf)
 
 추후에 BIFI 논문에 관련한 내용을 다시 정리해 올릴 예정이다.
 

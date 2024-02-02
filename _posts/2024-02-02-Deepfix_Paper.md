@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Deepfix_Paper"
-date:   2024-02-02 23:10:00 +0900
+date:   2024-02-02 22:10:00 +0900
 categories: [Machine Learning, Code Fix]
 ---
 #### DEEPFIX 논문 정리
@@ -10,7 +10,7 @@ categories: [Machine Learning, Code Fix]
 
 아래 PDF는 erroneous code 자동 수정의 baseline에 해당하는 Deepfix에 대한 논문을 읽고 정리한 내용이다.
 
-[DeepFix정리](../assets/pdf/Deepfix_study.pdf)
+[DeepFix정리](/assets/pdf/Deepfix_study.pdf)
 
 Erroneous code의 자동 수정과 관련된 논의는 **DrRepair** 논문과 **BIFI** 관련 논문에서 더 발전된 형태로 다루어진다.
 

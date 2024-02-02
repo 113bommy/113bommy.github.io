@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Beam_Search 정리"
-date:   2024-02-02 23:10:00 +0900
+date:   2024-02-03 23:10:00 +0900
 categories: [Algorithm, Search Algorithm]
 ---
 #### Beam_Search 정리
