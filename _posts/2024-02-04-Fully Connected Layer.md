@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Fully Connected Layer Activation Function"
+title:  "Fully Connected Layer"
 date:   2024-02-04 00:10:00 +0900
-categories: [Machine Learning, CNN]   
+categories: [Machine Learning, RNN]   
 ---
 ## **Fully Connected Layer / Activation Function**
 
