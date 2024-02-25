@@ -141,6 +141,7 @@ SoftMax 함수를 적용한 분포는 결국, Decoder의 특정 Cell에서 각 E
 ### **2.3 Attention Value 계산**
 
 앞서 계산한 Attention Distribution을 바탕으로 Attention Value를 계산할 수 있다. 앞서 계산한 가중치를 각 Encoder의 hidden state에 scalar 곱을 진행하여 state들을 전부 더해준다면, **Attention Value**를 구할 수 있고, 이를 **Context Vector**라고도 부른다.
+
 ![Attention Dot product](/assets/img/RNN/Attention%20Mechanism/dotproductattention4.png)
 
 이를 수식으로 표한하면 아래와 같다.
