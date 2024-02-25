@@ -43,9 +43,9 @@ CodeT5를 비롯한 거의 모든 transformer 기반의 모델들이 Attention M
 
 Seq2Seq + Attention 구조를 가진 RNN에 대해서 Attention Score를 계산하려면, 각 Decoder Cell에 입력드로 들어가는 hidden state를 활용하여 Attention Score를 계산해주어야 한다.
 
-Decoder의 hidden state 길이와 Encoder의 hidden state 길이가 동일하다고 가정한다면, 예측하려는 Decoder Cell의 hidden state ($s_t$)와 Encoder Cell의 hidden state($h_1, h_2, ..., h_n$)의 구조가 동일할 것이다.
+Decoder의 hidden state 길이와 Encoder의 hidden state 길이가 동일하다고 가정한다면, 예측하려는 Decoder Cell의 hidden state ($$s_t$$)와 Encoder Cell의 hidden state($$h_1, h_2, ..., h_n$$)의 구조가 동일할 것이다.
 
-따라서, $s_t$와 $h_1, h_2, ..., h_n$시퀀스의 dot production을 진행할 수 있게 되기에, 해당 연산을 진행한 값을 $e^t$로 정의할 수 있고, 해당 식을 아래와 같이 표현할 수 있다.
+따라서, $$s_t$$와 $$h_1, h_2, ..., h_n$$시퀀스의 dot production을 진행할 수 있게 되기에, 해당 연산을 진행한 값을 $$e^t$$로 정의할 수 있고, 해당 식을 아래와 같이 표현할 수 있다.
 
 <math xmlns="http://www.w3.org/1998/Math/MathML">
   <mi>s</mi>
@@ -130,11 +130,11 @@ Decoder의 hidden state 길이와 Encoder의 hidden state 길이가 동일하다
 
 ### **2.2 Attention Distribution 계산**
 
-앞에서 구한 $e^t$ 벡터는 각 encoder의 hidden state와 예측하려는 Decoder cell과의 관계를 나타내는 Vector로 생각할 수 있다. 이제 해당 벡터에 SoftMax 함수를 적용하여 분포 형태로 만들어주는데, 이를 **Attention Distribution**이라고 부른다.
+앞에서 구한 $$e^t$$ 벡터는 각 encoder의 hidden state와 예측하려는 Decoder cell과의 관계를 나타내는 Vector로 생각할 수 있다. 이제 해당 벡터에 SoftMax 함수를 적용하여 분포 형태로 만들어주는데, 이를 **Attention Distribution**이라고 부른다.
 
 ![Attention Dot product](/assets/img/RNN/Attention%20Mechanism/dotproductattention3.png)
 
-$a^t = softmax(e^t)$
+$$a^t = softmax(e^t)$$
 
 SoftMax 함수를 적용한 분포는 결국, Decoder의 특정 Cell에서 각 Encoder Input이 얼마나 많은 기여도를 가지는지를 의미하므로, 이를 바탕으로 Attention Value를 계산하는 데에 활용할 수 있다.
 
@@ -145,13 +145,13 @@ SoftMax 함수를 적용한 분포는 결국, Decoder의 특정 Cell에서 각 E
 
 이를 수식으로 표한하면 아래와 같다.
 
-$a_t = \sum_{i=1}^{N} a^t_ih_i$
+$$a_t = \sum_{i=1}^{N} a^t_ih_i$$
 
 해당 연산을 통해서 구해진 Context Vector는 인코더의 문맥을 포함하고 있다고 볼 수 있고, 입력의 길이가 길어지면, 정보의 소실이 발생하는 문제를 어느정도 해결할 수 있다.
 
 ### **2.4 Concatenate Vector 계산**
 
-위의 Attention Value를 구하고, Attention Distribution을 구하고 최종적으로 생성한 **Attention Value** $a_t$는 결국 기존의 s_t와 결합되어 하나의 벡터로 만들어주어야 하고, 이를 통해서 Attention Mechanism이 정상적으로 동작할 수 있게 되는 것이다.
+위의 Attention Value를 구하고, Attention Distribution을 구하고 최종적으로 생성한 **Attention Value** $$a_t$$는 결국 기존의 s_t와 결합되어 하나의 벡터로 만들어주어야 하고, 이를 통해서 Attention Mechanism이 정상적으로 동작할 수 있게 되는 것이다.
 
 Encoder의 hidden state와 Deccoder의 hidden state를 동일한 크기로 가정했을 때, Attention Value의 경우도 동일한 크기를 가질 것이기에, Concatenate된 Vector는 **기존 hidden state의 2배의 길이**를 가지게 된다.
 
@@ -163,7 +163,7 @@ Encoder의 hidden state와 Deccoder의 hidden state를 동일한 크기로 가�
 
 ![Attention Dot product](/assets/img/RNN/Attention%20Mechanism/dotproductattention5.png)
 
-이때, 사용하는 가중치 $W_c, b_c$는 학습이 가능한 것들이다.
+이때, 사용하는 가중치 $$W_c, b_c$$는 학습이 가능한 것들이다.
 
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
   <msub>
