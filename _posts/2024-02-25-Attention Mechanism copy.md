@@ -2,7 +2,7 @@
 layout: post
 title:  "Attention Mechanism"
 date:   2024-02-25 00:10:00 +0900
-categories: [Machine Learning, RNN]   
+categories: [NLP, LLM]   
 ---
 ## **Attention Mechanism**
 

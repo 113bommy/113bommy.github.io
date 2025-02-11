@@ -2,7 +2,7 @@
 layout: post
 title:  "Matrix Calculus - Backpropagation"
 date:   2023-09-12 23:10:00 +0900
-categories: [Machine Learning, CS231n]
+categories: [Computer Vision, CS231n]
 ---
 #### Matrix Calculus
 

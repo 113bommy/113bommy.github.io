@@ -2,7 +2,7 @@
 layout: post
 title:  "BIFI_Paper"
 date:   2024-02-02 00:10:00 +0900
-categories: [Machine Learning, Code Fix]
+categories: [NLP, Code Fix]
 ---
 #### BIFI 논문 정리
 
