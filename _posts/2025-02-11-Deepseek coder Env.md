@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Deepseek Coder Enviroment Setting"
-date:   2025-02-07 00:10:00 +0900
+date:   2025-02-11 00:10:00 +0900
 categories: [NLP, Enviroment]   
 ---
 ## DeepSeek Coder Installation
