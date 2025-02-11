@@ -2,7 +2,7 @@
 layout: post
 title:  "250211 Research Note"
 date:   2024-02-07 00:10:00 +0900
-categories: [LLM, Enviroment]   
+categories: [Research Note]   
 ---
 ## 2025.02.11 Research Note
 
