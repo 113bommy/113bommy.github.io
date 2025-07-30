@@ -1,110 +1,73 @@
 ---
-layout: page
-refactor: true
+layout: default
 ---
 
-{% include lang.html %}
+<div class="home">
+  {%- if page.title -%}
+    <h1 class="page-heading">{{ page.title }}</h1>
+  {%- endif -%}
 
-{% assign pinned = site.posts | where: 'pin', 'true' %}
-{% assign default = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
+  {{ content }}
 
-{% assign posts = '' | split: '' %}
+  <div class="profile-section">
+    <h2>👋 About Me</h2>
+    <p>코딩과 함께 성장하는 것을 즐기는 개발자, 봄입니다. 🚀<br>
+    이 블로그는 저의 공부 기록을 남기는 공간입니다.</p>
+  </div>
 
-<!-- Get pinned posts -->
+  <h2 class="post-list-heading">✨ Featured Posts</h2>
+  <ul class="post-list">
+    {%- for post in site.posts limit:3 -%}
+    <li>
+      <h3>
+        <a class="post-link" href="{{ post.url | relative_url }}">
+          {{ post.title | escape }}
+        </a>
+      </h3>
+      <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+      {%- if site.show_excerpts -%}
+        {{ post.excerpt }}
+      {%- endif -%}
+    </li>
+    {%- endfor -%}
+  </ul>
 
-{% assign offset = paginator.page | minus: 1 | times: paginator.per_page %}
-{% assign pinned_num = pinned.size | minus: offset %}
+   <h2 class="post-list-heading">📚 Categories</h2>
+   <div class="category-list">
+     <a href="/categories/frontend.html" class="category-link">Frontend</a>
+     <a href="/categories/backend.html" class="category-link">Backend</a>
+     <a href="/categories/algorithm.html" class="category-link">Algorithm</a>
+   </div>
 
-{% if pinned_num > 0 %}
-  {% for i in (offset..pinned.size) limit: pinned_num %}
-    {% assign posts = posts | push: pinned[i] %}
-  {% endfor %}
-{% else %}
-  {% assign pinned_num = 0 %}
-{% endif %}
 
-<!-- Get default posts -->
+  <p class="rss-subscribe">Subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p>
 
-{% assign default_beg = offset | minus: pinned.size %}
-
-{% if default_beg < 0 %}
-  {% assign default_beg = 0 %}
-{% endif %}
-
-{% assign default_num = paginator.posts | size | minus: pinned_num %}
-{% assign default_end = default_beg | plus: default_num | minus: 1 %}
-
-{% if default_num > 0 %}
-  {% for i in (default_beg..default_end) %}
-    {% assign posts = posts | push: default[i] %}
-  {% endfor %}
-{% endif %}
-
-<div id="post-list">
-  {% for post in posts %}
-    <a href="{{ post.url | relative_url }}" class="card-wrapper">
-      <div class="card post-preview flex-md-row-reverse">
-        {% if post.image %}
-          {% if post.image.lqip %}
-            {% capture lqip %}lqip="{{ post.image.lqip }}"{% endcapture %}
-          {% endif %}
-
-          {% assign src = post.image.path | default: post.image %}
-          {% unless src contains '//' %}
-            {% assign src = post.img_path | append: '/' | append: src | replace: '//', '/' %}
-          {% endunless %}
-
-          {% assign alt = post.image.alt | xml_escape | default: 'Preview Image' %}
-
-          <img src="{{ src }}" w="17" h="10" alt="{{ alt }}" {{ lqip }}>
-        {% endif %}
-
-        <div class="card-body d-flex flex-column">
-          <h1 class="card-title my-2 mt-md-0">
-            {{ post.title }}
-          </h1>
-
-          <div class="card-text post-content mt-0 mb-2">
-            <p>
-              {% include no-linenos.html content=post.content %}
-              {{ content | markdownify | strip_html | truncate: 200 | escape }}
-            </p>
-          </div>
-
-          <div class="post-meta flex-grow-1 d-flex align-items-end">
-            <div class="me-auto">
-              <!-- posted date -->
-              <i class="far fa-calendar fa-fw me-1"></i>
-              {% include datetime.html date=post.date lang=lang %}
-
-              <!-- categories -->
-              {% if post.categories.size > 0 %}
-                <i class="far fa-folder-open fa-fw me-1"></i>
-                <span class="categories">
-                  {% for category in post.categories %}
-                    {{ category }}
-                    {%- unless forloop.last -%},{%- endunless -%}
-                  {% endfor %}
-                </span>
-              {% endif %}
-            </div>
-
-            {% if post.pin %}
-              <div class="pin ms-1">
-                <i class="fas fa-thumbtack fa-fw"></i>
-                <span>{{ site.data.locales[lang].post.pin_prompt }}</span>
-              </div>
-            {% endif %}
-          </div>
-          <!-- .post-meta -->
-        </div>
-        <!-- .card-body -->
-      </div>
-    </a>
-  {% endfor %}
 </div>
-<!-- #post-list -->
 
-{% if paginator.total_pages > 1 %}
-  {% include post-paginator.html %}
-{% endif %}
+<style>
+  /* 추가된 스타일에 대한 CSS */
+  .profile-section {
+    text-align: center;
+    margin: 40px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+  .category-list {
+    text-align: center;
+    margin: 20px 0 40px;
+  }
+  .category-link {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    background: #333;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+  .category-link:hover {
+    background: #555;
+  }
+</style>
