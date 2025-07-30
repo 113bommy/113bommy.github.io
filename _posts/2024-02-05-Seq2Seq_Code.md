@@ -2,7 +2,7 @@
 layout: post
 title:  "Seq2Seq Code"
 date:   2024-02-05 00:10:00 +0900
-categories: [NLP, RNN]   
+categories: [RNN]   
 ---
 ## **Seq2Seq 코드**
 

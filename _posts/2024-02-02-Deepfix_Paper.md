@@ -2,7 +2,7 @@
 layout: post
 title:  "Deepfix_Paper"
 date:   2024-02-02 00:10:00 +0900
-categories: [NLP, Code Fix]
+categories: [CodeLLM, Code Fix]
 ---
 #### DEEPFIX 논문 정리
 
