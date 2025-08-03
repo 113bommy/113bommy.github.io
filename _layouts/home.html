@@ -6,9 +6,9 @@ refactor: true
   Custom home layout for Chirpy-based blog (113bommy.github.io)
   Features added:
     1. Hero/intro section pulling data from _config.yml (title, description, avatar).
-    2. "최근 포스트" grid – latest 4 posts with auto‑detected thumbnails (first image in post) or fallback.
+    2. "최근 포스트" grid – latest 4 posts with auto‑detected thumbnails (front‑matter `img_path` → first markdown image → fallback) .
     3. Interactive treemap of categories (size = number of posts) built with D3 v7.
-  Place this file under your repository’s `_layouts` folder; pages whose front-matter says `layout: home` (e.g. index.html / index.md) will automatically use it.
+  Place this file under `_layouts` and set `layout: home` on index page.
 {%- endcomment -%}
 <!DOCTYPE html>
 <html lang="{{ page.lang | default: site.lang | default: 'en' }}">
@@ -36,41 +36,39 @@ refactor: true
                     | where_exp: "p","p.draft != true" 
                     | sort: 'date' | reverse | slice: 0,4 -%}
               {%- for post in recent_posts -%}
-              {%- comment -%}
-                ▸ 썸네일 선정 우선순위
-                  1. front‑matter `img_path`
-                  2. 첫 번째 마크다운 이미지 ![...](url)
-                  3. `/assets/img/default-thumbnail.webp`
-              {%- endcomment -%}
-
-              {%- assign thumb = nil -%}
-              {%- if post.img_path -%}
-                {%- assign thumb = post.img_path | relative_url -%}
-              {%- else -%}
-                {%- capture raw %}{{ post.content | strip_newlines }}{%- endcapture -%}
-                {%- if raw contains '!['] -%}
-                  {%- assign seg = raw | split: '!['] -%}
-                  {%- assign seg2 = seg[1] | split: '(' -%}
-                  {%- if seg2.size > 1 -%}
-                    {%- assign seg3 = seg2[1] | split: ')' -%}
-                    {%- assign first_img = seg3[0] -%}
-                    {%- assign thumb = first_img | strip -%}
-                  {%- endif -%}
+                {%- assign thumb = nil -%}
+                {# 1️⃣ front‑matter #}
+                {%- if post.img_path %}
+                  {%- assign thumb = post.img_path | relative_url -%}
+                {%- else -%}
+                  {# 2️⃣ 첫 번째 마크다운 이미지 찾기 #}
+                  {%- capture raw %}{{ post.content }}{%- endcapture -%}
+                  {%- assign segments = raw | split: '![' -%}
+                  {%- for seg in segments offset:1 -%}
+                    {%- assign seg_parts = seg | split: '](' -%}
+                    {%- if seg_parts.size > 1 -%}
+                      {%- assign candidate = seg_parts[1] | split: ')' | first | strip -%}
+                      {%- if candidate != '' -%}
+                        {%- assign thumb = candidate -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
                 {%- endif -%}
-              {%- endif -%}
-              {%- if thumb == nil or thumb == '' -%}
-                {%- assign thumb = `/assets/img/Placeholder_view.png` | relative_url -%}
-              {%- endif -%}
+                {# 3️⃣ fallback #}
+                {%- if thumb == nil or thumb == '' -%}
+                  {%- assign thumb = '/assets/img/default-thumbnail.webp' | relative_url -%}
+                {%- endif -%}
 
-              <div class="col-12 col-sm-6 col-lg-3">
-                <a href="{{ post.url | relative_url }}" class="card h-100 border-0 shadow-sm text-decoration-none">
-                  <img src="{{ thumb }}" class="card-img-top" style="object-fit:cover;height:160px;" alt="{{ post.title }} thumbnail">
-                  <div class="card-body">
-                    <h3 class="card-title h6 mb-1 fw-bold text-dark">{{ post.title }}</h3>
-                    <p class="card-text small text-muted mb-0">{{ post.date | date: '%Y-%m-%d' }}</p>
-                  </div>
-                </a>
-              </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                  <a href="{{ post.url | relative_url }}" class="card h-100 border-0 shadow-sm text-decoration-none">
+                    <img src="{{ thumb }}" class="card-img-top" style="object-fit:cover;height:160px;" alt="{{ post.title }} thumbnail">
+                    <div class="card-body">
+                      <h3 class="card-title h6 mb-1 fw-bold text-dark">{{ post.title }}</h3>
+                      <p class="card-text small text-muted mb-0">{{ post.date | date: '%Y-%m-%d' }}</p>
+                    </div>
+                  </a>
+                </div>
               {%- endfor -%}
             </div>
           </div>
@@ -91,11 +89,11 @@ refactor: true
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const data = {
-          name: "categories",
+          name: 'categories',
           children: [
             {% assign cats = site.categories %}
             {% for cat in cats %}
-              { name: "{{ cat[0] | slugify }}", label: "{{ cat[0] }}", value: {{ cat[1].size }} }{% unless forloop.last %},{% endunless %}
+              { name: '{{ cat[0] | slugify }}', label: '{{ cat[0] }}', value: {{ cat[1].size }} }{% unless forloop.last %},{% endunless %}
             {% endfor %}
           ]
         };
@@ -106,28 +104,26 @@ refactor: true
         const width  = container.getBoundingClientRect().width || window.innerWidth - 48;
         const height = container.getBoundingClientRect().height || 500;
 
-        const root = d3.treemap()
-          .size([width, height])
-          .paddingInner(4)
-          (d3.hierarchy(data).sum(d => d.value));
+        const root = d3.treemap().size([width, height]).paddingInner(4)(
+          d3.hierarchy(data).sum(d => d.value)
+        );
 
         const color = d3.scaleOrdinal(d3.schemeCategory10);
 
         const div = d3.select(container);
-
         const nodes = div.selectAll('div.tnode')
           .data(root.leaves())
           .enter().append('div')
             .attr('class','tnode')
-            .style('position', 'absolute')
+            .style('position','absolute')
             .style('left', d => d.x0 + 'px')
             .style('top',  d => d.y0 + 'px')
-            .style('width', d => Math.max(0, d.x1 - d.x0) + 'px')
+            .style('width',  d => Math.max(0, d.x1 - d.x0) + 'px')
             .style('height', d => Math.max(0, d.y1 - d.y0) + 'px')
             .style('background', (d,i) => color(i))
-            .style('border-radius', '6px')
-            .style('overflow', 'hidden')
-            .style('cursor', 'pointer')
+            .style('border-radius','6px')
+            .style('overflow','hidden')
+            .style('cursor','pointer')
             .style('opacity',.85)
             .on('mouseover', function(){ d3.select(this).style('opacity',1); })
             .on('mouseout',  function(){ d3.select(this).style('opacity',.85); })
