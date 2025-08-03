@@ -2,7 +2,8 @@
 layout: post
 title:  "Direct Preference Optimization"
 date:   2025-02-18 00:10:00 +0900
-categories: [Transformer, LLM]   
+categories: [Transformer, LLM]
+tags: [RL, LLM]
 ---
 
 # **Direct Preference Optimization** - Your Language Model is Secretly a Reward Model
