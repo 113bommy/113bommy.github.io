@@ -3,120 +3,127 @@ layout: default
 refactor: true
 ---
 
-{% include lang.html %}
+{%- comment -%}
+  Custom home layout for Chirpy-based blog (113bommy.github.io)
+  Features added:
+    1. Hero/intro section pulling data from _config.yml (title, description, avatar).
+    2. "최근 포스트" grid – latest 4 posts with cover images (post.img_path front‑matter or fallback image).
+    3. Interactive treemap of categories (size = number of posts) built with D3 v7.
+  Place this file under your repository’s `_layouts` folder; pages whose front‑matter says `layout: home` (e.g. index.html / index.md) will automatically use it.
+{%- endcomment -%}
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
+  {%- include head.html -%}
+  <body>
+    {%- include sidebar.html -%}
+    <div class="page-wrapper d-flex flex-column">
+      {%- include topbar.html -%}
 
-{% assign all_pinned = site.posts | where: 'pin', 'true' %}
-{% assign all_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
+      <main class="flex-fill">
+        <!-- ▣ 1. INTRO ------------------------------------------------------ -->
+        <section id="home-intro" class="text-center py-5 container">
+          <img src="{{ site.avatar | default: '/assets/img/avatar.png' | relative_url }}" class="rounded-circle mb-3 shadow" style="width:120px;height:120px;object-fit:cover;" alt="avatar">
+          <h1 class="h3 fw-bold mb-1">{{ site.title }}</h1>
+          <p class="lead mb-0">{{ site.tagline | default: site.description }}</p>
+        </section>
 
-{% assign posts = '' | split: '' %}
-
-<!-- Get pinned posts on current page -->
-
-{% assign visible_start = paginator.page | minus: 1 | times: paginator.per_page %}
-{% assign visible_end = visible_start | plus: paginator.per_page %}
-
-{% if all_pinned.size > visible_start %}
-  {% if all_pinned.size > visible_end %}
-    {% assign pinned_size = paginator.per_page %}
-  {% else %}
-    {% assign pinned_size = all_pinned.size | minus: visible_start %}
-  {% endif %}
-
-  {% for i in (visible_start..all_pinned.size) limit: pinned_size %}
-    {% assign posts = posts | push: all_pinned[i] %}
-  {% endfor %}
-{% else %}
-  {% assign pinned_size = 0 %}
-{% endif %}
-
-<!-- Get normal posts on current page -->
-
-{% assign normal_size = paginator.posts | size | minus: pinned_size %}
-
-{% if normal_size > 0 %}
-  {% if pinned_size > 0 %}
-    {% assign normal_start = 0 %}
-  {% else %}
-    {% assign normal_start = visible_start | minus: all_pinned.size %}
-  {% endif %}
-
-  {% assign normal_end = normal_start | plus: normal_size | minus: 1 %}
-
-  {% for i in (normal_start..normal_end) %}
-    {% assign posts = posts | push: all_normal[i] %}
-  {% endfor %}
-{% endif %}
-
-<div id="post-list" class="flex-grow-1 px-xl-1">
-  {% for post in posts %}
-    <article class="card-wrapper card">
-      <a href="{{ post.url | relative_url }}" class="post-preview row g-0 flex-md-row-reverse">
-        {% assign card_body_col = '12' %}
-
-        {% if post.image %}
-          {% assign src = post.image.path | default: post.image %}
-          {% capture src %}{% include media-url.html src=src subpath=post.media_subpath %}{% endcapture %}
-
-          {% assign alt = post.image.alt | xml_escape | default: 'Preview Image' %}
-
-          {% assign lqip = null %}
-
-          {% if post.image.lqip %}
-            {% capture lqip_url %}{% include media-url.html src=post.image.lqip subpath=post.media_subpath %}{% endcapture %}
-            {% assign lqip = 'lqip="' | append: lqip_url | append: '"' %}
-          {% endif %}
-
-          <div class="col-md-5">
-            <img src="{{ src }}" alt="{{ alt }}" {{ lqip }}>
-          </div>
-
-          {% assign card_body_col = '7' %}
-        {% endif %}
-
-        <div class="col-md-{{ card_body_col }}">
-          <div class="card-body d-flex flex-column">
-            <h1 class="card-title my-2 mt-md-0">{{ post.title }}</h1>
-
-            <div class="card-text content mt-0 mb-3">
-              <p>{% include post-description.html %}</p>
-            </div>
-
-            <div class="post-meta flex-grow-1 d-flex align-items-end">
-              <div class="me-auto">
-                <!-- posted date -->
-                <i class="far fa-calendar fa-fw me-1"></i>
-                {% include datetime.html date=post.date lang=lang %}
-
-                <!-- categories -->
-                {% if post.categories.size > 0 %}
-                  <i class="far fa-folder-open fa-fw me-1"></i>
-                  <span class="categories">
-                    {% for category in post.categories %}
-                      {{ category }}
-                      {%- unless forloop.last -%},{%- endunless -%}
-                    {% endfor %}
-                  </span>
-                {% endif %}
+        <!-- ▣ 2. RECENT POSTS ------------------------------------------------ -->
+        <section id="recent-posts" class="py-5 bg-body-tertiary">
+          <div class="container">
+            <h2 class="h4 fw-semibold mb-4">최근 포스트</h2>
+            <div class="row g-4">
+              {%- assign recent_posts = site.posts 
+                    | where_exp: "p","p.hidden != true" 
+                    | where_exp: "p","p.draft != true" 
+                    | sort: 'date' | reverse | slice: 0,4 -%}
+              {%- for post in recent_posts -%}
+              <div class="col-12 col-sm-6 col-lg-3">
+                <a href="{{ post.url | relative_url }}" class="card h-100 border-0 shadow-sm text-decoration-none">
+                  {% if post.img_path %}
+                    <img src="{{ post.img_path | relative_url }}" class="card-img-top" alt="{{ post.title }} thumbnail">
+                  {% else %}
+                    {# fallback image (edit to suit) #}
+                    <img src="{{ '/assets/img/default-thumbnail.webp' | relative_url }}" class="card-img-top" alt="thumbnail placeholder">
+                  {% endif %}
+                  <div class="card-body">
+                    <h3 class="card-title h6 mb-1 fw-bold text-dark">{{ post.title }}</h3>
+                    <p class="card-text small text-muted mb-0">{{ post.date | date: '%Y-%m-%d' }}</p>
+                  </div>
+                </a>
               </div>
-
-              {% if post.pin %}
-                <div class="pin ms-1">
-                  <i class="fas fa-thumbtack fa-fw"></i>
-                  <span>{{ site.data.locales[lang].post.pin_prompt }}</span>
-                </div>
-              {% endif %}
+              {%- endfor -%}
             </div>
-            <!-- .post-meta -->
           </div>
-          <!-- .card-body -->
-        </div>
-      </a>
-    </article>
-  {% endfor %}
-</div>
-<!-- #post-list -->
+        </section>
 
-{% if paginator.total_pages > 1 %}
-  {% include post-paginator.html %}
-{% endif %}
-jek
+        <!-- ▣ 3. CATEGORY TREEMAP ------------------------------------------- -->
+        <section id="category-section" class="py-5 container">
+          <h2 class="h4 fw-semibold mb-4">카테고리</h2>
+          <div id="treemap" style="height:500px;"></div>
+        </section>
+      </main>
+
+      {%- include footer.html -%}
+    </div>
+
+    <!-- ▣ D3 Treemap script ------------------------------------------------- -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+      (function() {
+        const data = {
+          name: "categories",
+          children: [
+            {% assign cats = site.categories %}
+            {% for cat in cats %}
+              { name: "{{ cat[0] | slugify }}", label: "{{ cat[0] }}", value: {{ cat[1].size }} }{% unless forloop.last %},{% endunless %}
+            {% endfor %}
+          ]
+        };
+
+        const container = document.getElementById('treemap');
+        if (!container) return;
+
+        const width  = container.clientWidth || 600;
+        const height = container.clientHeight || 400;
+
+        // Create hierarchy and treemap layout
+        const root = d3.treemap()
+          .size([width, height])
+          .paddingInner(4)
+          (d3.hierarchy(data).sum(d => d.value));
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        const div = d3.select(container)
+          .style('position', 'relative');
+
+        const nodes = div.selectAll('div')
+          .data(root.leaves())
+          .enter().append('div')
+            .style('position', 'absolute')
+            .style('left', d => d.x0 + 'px')
+            .style('top',  d => d.y0 + 'px')
+            .style('width', d => Math.max(0, d.x1 - d.x0) + 'px')
+            .style('height', d => Math.max(0, d.y1 - d.y0) + 'px')
+            .style('background', (d,i) => color(i))
+            .style('border-radius', '6px')
+            .style('overflow', 'hidden')
+            .style('cursor', 'pointer')
+            .on('click', (e,d) => {
+              const base = '{{ site.baseurl | default: "" }}/categories/' + d.data.name + '/';
+              window.location.href = base;
+            });
+
+        nodes.append('span')
+          .style('display','block')
+          .style('padding','6px')
+          .style('font-size','0.85rem')
+          .style('color','#000')
+          .style('font-weight','600')
+          .text(d => d.data.label + ' (' + d.data.value + ')');
+      })();
+    </script>
+
+    {%- include search-loader.html -%}
+  </body>
+</html>
