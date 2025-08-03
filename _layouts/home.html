@@ -3,10 +3,8 @@ layout: default
 refactor: true
 ---
 {%- comment -%}
-  home.html (custom layout) – 113bommy.github.io
-  ✔ Fix: layout breakage on Chirpy sidebar / narrow width
-  ✔ Use .container-xl & Bootstrap row-cols for proper grid
-  ✔ Thumbnails scaled via class plus inline style removal (height via CSS)
+  home.html – 113bommy.github.io
+  Thumbnail update: keep aspect ratio (`object-fit:contain`) with letter‑boxing instead of cropping.
 {%- endcomment -%}
 <!DOCTYPE html>
 <html lang="{{ page.lang | default: site.lang | default: 'en' }}">
@@ -48,7 +46,7 @@ refactor: true
                 {%- endif -%}
 
                 {%- if thumb == nil or thumb == '' -%}
-                  {%- assign thumb = '/assets/img/default-thumbnail.webp' -%}
+                  {%- assign thumb = '/assets/img/Placeholder_view.png' -%}
                 {%- endif -%}
 
                 {%- unless thumb contains '://' -%}
@@ -57,7 +55,9 @@ refactor: true
 
                 <div class="col">
                   <a href="{{ post.url | relative_url }}" class="card h-100 border-0 shadow-sm text-decoration-none">
-                    <img src="{{ thumb }}" class="card-img-top img-fluid thumb-fixed" alt="{{ post.title }} thumbnail">
+                    <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center">
+                      <img src="{{ thumb }}" class="thumb-fixed" alt="{{ post.title }} thumbnail">
+                    </div>
                     <div class="card-body">
                       <h3 class="card-title h6 mb-1 fw-bold text-dark">{{ post.title }}</h3>
                       <p class="card-text small text-muted mb-0">{{ post.date | date: '%Y-%m-%d' }}</p>
@@ -79,9 +79,18 @@ refactor: true
       {%- include footer.html -%}
     </div>
 
-    <!-- ▣ Custom CSS to limit thumbnail height ------------------------- -->
+    <!-- ▣ Custom CSS --------------------------------------------------- -->
     <style>
-      .thumb-fixed { height: 150px; object-fit: cover; }
+      /* 썸네일: 비율 유지하면서 여백 처리 */
+      .thumb-fixed {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;   /* 비율 유지, letter‑box */
+        object-position: center center;
+      }
+      .ratio-4x3 {
+        --bs-aspect-ratio: 75%; /* 4:3 */
+      }
     </style>
 
     <!-- ▣ D3 Treemap script ------------------------------------------- -->
