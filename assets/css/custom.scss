@@ -1,0 +1,17 @@
+/* /assets/css/custom.scss */
+
+/* PDF 렌더링을 위한 사용자 정의 스타일 */
+.pdf-container canvas {
+  /* 캔버스가 부모 영역을 넘어가지 않도록 최대 너비를 100%로 설정 */
+  max-width: 100%;
+
+  /* 높이는 비율에 맞춰 자동으로 조정 */
+  height: auto !important;
+
+  /* 블록 요소로 만들어 정렬 및 간격 문제를 방지 */
+  display: block;
+
+  /* 페이지 가운데 정렬 (선택 사항) */
+  margin-left: auto;
+  margin-right: auto;
+}
