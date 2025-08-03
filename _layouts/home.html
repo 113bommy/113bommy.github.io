@@ -4,7 +4,7 @@ refactor: true
 ---
 {%- comment -%}
   home.html – 113bommy.github.io
-  Thumbnail update: keep aspect ratio (`object-fit:contain`) with letter‑boxing instead of cropping.
+  Patch: ensure "Home" label remains visible when sidebar Home link is active
 {%- endcomment -%}
 <!DOCTYPE html>
 <html lang="{{ page.lang | default: site.lang | default: 'en' }}">
@@ -46,7 +46,7 @@ refactor: true
                 {%- endif -%}
 
                 {%- if thumb == nil or thumb == '' -%}
-                  {%- assign thumb = '/assets/img/Placeholder_view.png' -%}
+                  {%- assign thumb = '/assets/img/default-thumbnail.webp' -%}
                 {%- endif -%}
 
                 {%- unless thumb contains '://' -%}
@@ -85,67 +85,34 @@ refactor: true
       .thumb-fixed {
         max-width: 100%;
         max-height: 100%;
-        object-fit: contain;   /* 비율 유지, letter‑box */
+        object-fit: contain;
         object-position: center center;
       }
-      .ratio-4x3 {
-        --bs-aspect-ratio: 75%; /* 4:3 */
-      }
+      .ratio-4x3 { --bs-aspect-ratio: 75%; }
+
+      /* Fix: ensure label text visible when Home link is active */
+      .sidebar .nav-link.active span { opacity: 1 !important; visibility: visible !important; color: inherit !important; }
     </style>
 
     <!-- ▣ D3 Treemap script ------------------------------------------- -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const data = {
-          name: 'categories',
-          children: [
-            {% assign cats = site.categories %}
-            {% for cat in cats %}
-              { name: '{{ cat[0] | slugify }}', label: '{{ cat[0] }}', value: {{ cat[1].size }} }{% unless forloop.last %},{% endunless %}
-            {% endfor %}
-          ]
-        };
-
-        const container = document.getElementById('treemap');
-        if (!container || data.children.length === 0) return;
-
-        const width  = container.getBoundingClientRect().width;
-        const height = container.getBoundingClientRect().height;
-
-        const root = d3.treemap().size([width, height]).paddingInner(4)(
-          d3.hierarchy(data).sum(d => d.value)
-        );
-
-        const color = d3.scaleOrdinal(d3.schemeSet3);
-
-        const div = d3.select(container);
-        const nodes = div.selectAll('div.tnode')
-          .data(root.leaves())
-          .enter().append('div')
-            .attr('class','tnode')
-            .style('position','absolute')
-            .style('left', d => d.x0 + 'px')
-            .style('top',  d => d.y0 + 'px')
-            .style('width',  d => Math.max(0, d.x1 - d.x0) + 'px')
-            .style('height', d => Math.max(0, d.y1 - d.y0) + 'px')
-            .style('background', (d,i) => color(i))
-            .style('border-radius','6px')
-            .style('overflow','hidden')
-            .style('cursor','pointer')
-            .style('opacity',.9)
-            .on('click', (e,d) => {
-              window.location.href = '{{ site.baseurl | default: "" }}/categories/' + d.data.name + '/';
-            });
-
-        nodes.append('span')
-          .style('display','block')
-          .style('padding','6px')
-          .style('font-size','0.8rem')
-          .style('color','#000')
-          .style('font-weight','600')
-          .style('line-height','1.2')
-          .text(d => d.data.label + ' (' + d.data.value + ')');
+        const data = { name:'categories', children:[
+          {% assign cats = site.categories %}{% for cat in cats %}{ name:'{{ cat[0] | slugify }}', label:'{{ cat[0] }}', value:{{ cat[1].size }} }{% unless forloop.last %},{% endunless %}{% endfor %}
+        ]};
+        const container=document.getElementById('treemap'); if(!container||!data.children.length)return;
+        const width=container.getBoundingClientRect().width, height=container.getBoundingClientRect().height;
+        const root=d3.treemap().size([width,height]).paddingInner(4)(d3.hierarchy(data).sum(d=>d.value));
+        const color=d3.scaleOrdinal(d3.schemeSet3);
+        const div=d3.select(container);
+        const nodes=div.selectAll('div.tnode').data(root.leaves()).enter().append('div').attr('class','tnode')
+          .style('position','absolute').style('left',d=>d.x0+'px').style('top',d=>d.y0+'px')
+          .style('width',d=>Math.max(0,d.x1-d.x0)+'px').style('height',d=>Math.max(0,d.y1-d.y0)+'px')
+          .style('background',(d,i)=>color(i)).style('border-radius','6px').style('overflow','hidden')
+          .style('cursor','pointer').style('opacity',.9).on('click',(e,d)=>{window.location.href='{{ site.baseurl | default: "" }}/categories/'+d.data.name+'/';});
+        nodes.append('span').style('display','block').style('padding','6px').style('font-size','0.8rem').style('color','#000')
+          .style('font-weight','600').style('line-height','1.2').text(d=>d.data.label+' ('+d.data.value+')');
       });
     </script>
 
