@@ -1,14 +1,6 @@
----
-layout: default
-refactor: true
----
 {%- comment -%}
-  Custom home layout for Chirpy-based blog (113bommy.github.io)
-  Features added:
-    1. Hero/intro section pulling data from _config.yml (title, description, avatar).
-    2. "최근 포스트" grid – latest 4 posts with auto‑detected thumbnails (front‑matter `img_path` → first markdown image → fallback) .
-    3. Interactive treemap of categories (size = number of posts) built with D3 v7.
-  Place this file under `_layouts` and set `layout: home` on index page.
+  home.html (custom layout) – 113bommy.github.io
+  Updated: auto‑detect first image robustly (via markdownify → <img src="..."> parsing)
 {%- endcomment -%}
 <!DOCTYPE html>
 <html lang="{{ page.lang | default: site.lang | default: 'en' }}">
@@ -19,14 +11,14 @@ refactor: true
       {%- include topbar.html -%}
 
       <main class="flex-fill">
-        <!-- ▣ 1. INTRO ------------------------------------------------------ -->
+        <!-- ▣ 1. INTRO -------------------------------------------------- -->
         <section id="home-intro" class="text-center py-5 container">
           <img src="{{ site.avatar | default: '/assets/img/avatar.png' | relative_url }}" class="rounded-circle mb-3 shadow" style="width:120px;height:120px;object-fit:cover;" alt="avatar">
           <h1 class="h3 fw-bold mb-1">{{ site.title }}</h1>
           <p class="lead mb-0">{{ site.tagline | default: site.description }}</p>
         </section>
 
-        <!-- ▣ 2. RECENT POSTS ------------------------------------------------ -->
+        <!-- ▣ 2. RECENT POSTS ------------------------------------------- -->
         <section id="recent-posts" class="py-5 bg-body-tertiary">
           <div class="container">
             <h2 class="h4 fw-semibold mb-4">최근 포스트</h2>
@@ -37,28 +29,36 @@ refactor: true
                     | sort: 'date' | reverse | slice: 0,4 -%}
               {%- for post in recent_posts -%}
                 {%- assign thumb = nil -%}
-                {# 1️⃣ front‑matter #}
+
+                {%- comment -%}1️⃣ front‑matter image{%- endcomment -%}
                 {%- if post.img_path %}
-                  {%- assign thumb = post.img_path | relative_url -%}
-                {%- else -%}
-                  {# 2️⃣ 첫 번째 마크다운 이미지 찾기 #}
-                  {%- capture raw %}{{ post.content }}{%- endcapture -%}
-                  {%- assign segments = raw | split: '![' -%}
-                  {%- for seg in segments offset:1 -%}
-                    {%- assign seg_parts = seg | split: '](' -%}
-                    {%- if seg_parts.size > 1 -%}
-                      {%- assign candidate = seg_parts[1] | split: ')' | first | strip -%}
-                      {%- if candidate != '' -%}
-                        {%- assign thumb = candidate -%}
-                        {%- break -%}
-                      {%- endif -%}
-                    {%- endif -%}
-                  {%- endfor -%}
+                  {%- assign thumb = post.img_path -%}
                 {%- endif -%}
-                {# 3️⃣ fallback #}
+
+                {%- comment -%}2️⃣ parse first <img> tag after markdownify{%- endcomment -%}
                 {%- if thumb == nil or thumb == '' -%}
-                  {%- assign thumb = '/assets/img/default-thumbnail.webp' | relative_url -%}
+                  {%- capture html_content %}{{ post.content | markdownify }}{%- endcapture -%}
+                  {%- assign parts = html_content | split: '<img' -%}
+                  {%- if parts.size > 1 -%}
+                    {%- assign img_tag = parts[1] -%}
+                    {%- assign src_split = img_tag | split: 'src="' -%}
+                    {%- if src_split.size > 1 -%}
+                      {%- assign src_rest = src_split[1] | split: '"' -%}
+                      {%- assign first_src = src_rest[0] | strip -%}
+                      {%- assign thumb = first_src -%}
+                    {%- endif -%}
+                  {%- endif -%}
                 {%- endif -%}
+
+                {%- comment -%}3️⃣ fallback image{%- endcomment -%}
+                {%- if thumb == nil or thumb == '' -%}
+                  {%- assign thumb = '/assets/img/default-thumbnail.webp' -%}
+                {%- endif -%}
+
+                {%- comment -%}ensure relative URL for local paths{%- endcomment -%}
+                {%- unless thumb contains '://' -%}
+                  {%- assign thumb = thumb | relative_url -%}
+                {%- endunless -%}
 
                 <div class="col-12 col-sm-6 col-lg-3">
                   <a href="{{ post.url | relative_url }}" class="card h-100 border-0 shadow-sm text-decoration-none">
@@ -74,7 +74,7 @@ refactor: true
           </div>
         </section>
 
-        <!-- ▣ 3. CATEGORY TREEMAP ------------------------------------------- -->
+        <!-- ▣ 3. CATEGORY TREEMAP --------------------------------------- -->
         <section id="category-section" class="py-5 container">
           <h2 class="h4 fw-semibold mb-4">카테고리</h2>
           <div id="treemap" style="height:520px;position:relative;"></div>
@@ -84,7 +84,7 @@ refactor: true
       {%- include footer.html -%}
     </div>
 
-    <!-- ▣ D3 Treemap script ------------------------------------------------- -->
+    <!-- ▣ D3 Treemap script ------------------------------------------- -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
