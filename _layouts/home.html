@@ -40,7 +40,7 @@ refactor: true
                 ▸ 썸네일 선정 우선순위
                   1. front‑matter `img_path`
                   2. 첫 번째 마크다운 이미지 ![...](url)
-                  3. `/assets/img/Placeholder_view.png`
+                  3. `/assets/img/default-thumbnail.webp`
               {%- endcomment -%}
 
               {%- assign thumb = nil -%}
@@ -59,7 +59,7 @@ refactor: true
                 {%- endif -%}
               {%- endif -%}
               {%- if thumb == nil or thumb == '' -%}
-                {%- assign thumb = '/assets/img/default-thumbnail.webp' | relative_url -%}
+                {%- assign thumb = `/assets/img/Placeholder_view.png` | relative_url -%}
               {%- endif -%}
 
               <div class="col-12 col-sm-6 col-lg-3">
