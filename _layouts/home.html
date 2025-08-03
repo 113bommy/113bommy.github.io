@@ -1,8 +1,14 @@
+---
+layout: default
+refactor: true
+---
 {%- comment -%}
-  home.html (custom layout) – 113bommy.github.io
-  ✔ Fix: layout breakage on Chirpy sidebar / narrow width
-  ✔ Use .container-xl & Bootstrap row-cols for proper grid
-  ✔ Thumbnails scaled via class plus inline style removal (height via CSS)
+  Custom home layout for Chirpy-based blog (113bommy.github.io)
+  Features added:
+    1. Hero/intro section pulling data from _config.yml (title, description, avatar).
+    2. "최근 포스트" grid – latest 4 posts with auto‑detected thumbnails (first image in post) or fallback.
+    3. Interactive treemap of categories (size = number of posts) built with D3 v7.
+  Place this file under your repository’s `_layouts` folder; pages whose front-matter says `layout: home` (e.g. index.html / index.md) will automatically use it.
 {%- endcomment -%}
 <!DOCTYPE html>
 <html lang="{{ page.lang | default: site.lang | default: 'en' }}">
@@ -13,60 +19,65 @@
       {%- include topbar.html -%}
 
       <main class="flex-fill">
-        <!-- ▣ 1. INTRO -------------------------------------------------- -->
-        <section id="home-intro" class="text-center py-5 container-xl px-4">
+        <!-- ▣ 1. INTRO ------------------------------------------------------ -->
+        <section id="home-intro" class="text-center py-5 container">
           <img src="{{ site.avatar | default: '/assets/img/avatar.png' | relative_url }}" class="rounded-circle mb-3 shadow" style="width:120px;height:120px;object-fit:cover;" alt="avatar">
           <h1 class="h3 fw-bold mb-1">{{ site.title }}</h1>
           <p class="lead mb-0">{{ site.tagline | default: site.description }}</p>
         </section>
 
-        <!-- ▣ 2. RECENT POSTS ------------------------------------------- -->
+        <!-- ▣ 2. RECENT POSTS ------------------------------------------------ -->
         <section id="recent-posts" class="py-5 bg-body-tertiary">
-          <div class="container-xl px-4">
+          <div class="container">
             <h2 class="h4 fw-semibold mb-4">최근 포스트</h2>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+            <div class="row g-4">
               {%- assign recent_posts = site.posts 
                     | where_exp: "p","p.hidden != true" 
                     | where_exp: "p","p.draft != true" 
                     | sort: 'date' | reverse | slice: 0,4 -%}
               {%- for post in recent_posts -%}
-                {%- assign thumb = nil -%}
+              {%- comment -%}
+                ▸ 썸네일 선정 우선순위
+                  1. front‑matter `img_path`
+                  2. 첫 번째 마크다운 이미지 ![...](url)
+                  3. `/assets/img/default-thumbnail.webp`
+              {%- endcomment -%}
 
-                {%- if post.img_path %}
-                  {%- assign thumb = post.img_path -%}
-                {%- else -%}
-                  {%- capture html_content %}{{ post.content | markdownify }}{%- endcapture -%}
-                  {%- assign tmp = html_content | split: ' src="' -%}
-                  {%- if tmp.size > 1 -%}
-                    {%- assign first_src_part = tmp[1] | split: '"' | first -%}
-                    {%- assign thumb = first_src_part -%}
+              {%- assign thumb = nil -%}
+              {%- if post.img_path -%}
+                {%- assign thumb = post.img_path | relative_url -%}
+              {%- else -%}
+                {%- capture raw %}{{ post.content | strip_newlines }}{%- endcapture -%}
+                {%- if raw contains '!['] -%}
+                  {%- assign seg = raw | split: '!['] -%}
+                  {%- assign seg2 = seg[1] | split: '(' -%}
+                  {%- if seg2.size > 1 -%}
+                    {%- assign seg3 = seg2[1] | split: ')' -%}
+                    {%- assign first_img = seg3[0] -%}
+                    {%- assign thumb = first_img | strip -%}
                   {%- endif -%}
                 {%- endif -%}
+              {%- endif -%}
+              {%- if thumb == nil or thumb == '' -%}
+                {%- assign thumb = `/assets/img/Placeholder_view.png` | relative_url -%}
+              {%- endif -%}
 
-                {%- if thumb == nil or thumb == '' -%}
-                  {%- assign thumb = '/assets/img/default-thumbnail.webp' -%}
-                {%- endif -%}
-
-                {%- unless thumb contains '://' -%}
-                  {%- assign thumb = thumb | relative_url -%}
-                {%- endunless -%}
-
-                <div class="col">
-                  <a href="{{ post.url | relative_url }}" class="card h-100 border-0 shadow-sm text-decoration-none">
-                    <img src="{{ thumb }}" class="card-img-top img-fluid thumb-fixed" alt="{{ post.title }} thumbnail">
-                    <div class="card-body">
-                      <h3 class="card-title h6 mb-1 fw-bold text-dark">{{ post.title }}</h3>
-                      <p class="card-text small text-muted mb-0">{{ post.date | date: '%Y-%m-%d' }}</p>
-                    </div>
-                  </a>
-                </div>
+              <div class="col-12 col-sm-6 col-lg-3">
+                <a href="{{ post.url | relative_url }}" class="card h-100 border-0 shadow-sm text-decoration-none">
+                  <img src="{{ thumb }}" class="card-img-top" style="object-fit:cover;height:160px;" alt="{{ post.title }} thumbnail">
+                  <div class="card-body">
+                    <h3 class="card-title h6 mb-1 fw-bold text-dark">{{ post.title }}</h3>
+                    <p class="card-text small text-muted mb-0">{{ post.date | date: '%Y-%m-%d' }}</p>
+                  </div>
+                </a>
+              </div>
               {%- endfor -%}
             </div>
           </div>
         </section>
 
-        <!-- ▣ 3. CATEGORY TREEMAP --------------------------------------- -->
-        <section id="category-section" class="py-5 container-xl px-4">
+        <!-- ▣ 3. CATEGORY TREEMAP ------------------------------------------- -->
+        <section id="category-section" class="py-5 container">
           <h2 class="h4 fw-semibold mb-4">카테고리</h2>
           <div id="treemap" style="height:520px;position:relative;"></div>
         </section>
@@ -75,21 +86,16 @@
       {%- include footer.html -%}
     </div>
 
-    <!-- ▣ Custom CSS to limit thumbnail height ------------------------- -->
-    <style>
-      .thumb-fixed { height: 150px; object-fit: cover; }
-    </style>
-
-    <!-- ▣ D3 Treemap script ------------------------------------------- -->
+    <!-- ▣ D3 Treemap script ------------------------------------------------- -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const data = {
-          name: 'categories',
+          name: "categories",
           children: [
             {% assign cats = site.categories %}
             {% for cat in cats %}
-              { name: '{{ cat[0] | slugify }}', label: '{{ cat[0] }}', value: {{ cat[1].size }} }{% unless forloop.last %},{% endunless %}
+              { name: "{{ cat[0] | slugify }}", label: "{{ cat[0] }}", value: {{ cat[1].size }} }{% unless forloop.last %},{% endunless %}
             {% endfor %}
           ]
         };
@@ -97,30 +103,34 @@
         const container = document.getElementById('treemap');
         if (!container || data.children.length === 0) return;
 
-        const width  = container.getBoundingClientRect().width;
-        const height = container.getBoundingClientRect().height;
+        const width  = container.getBoundingClientRect().width || window.innerWidth - 48;
+        const height = container.getBoundingClientRect().height || 500;
 
-        const root = d3.treemap().size([width, height]).paddingInner(4)(
-          d3.hierarchy(data).sum(d => d.value)
-        );
+        const root = d3.treemap()
+          .size([width, height])
+          .paddingInner(4)
+          (d3.hierarchy(data).sum(d => d.value));
 
-        const color = d3.scaleOrdinal(d3.schemeSet3);
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
 
         const div = d3.select(container);
+
         const nodes = div.selectAll('div.tnode')
           .data(root.leaves())
           .enter().append('div')
             .attr('class','tnode')
-            .style('position','absolute')
+            .style('position', 'absolute')
             .style('left', d => d.x0 + 'px')
             .style('top',  d => d.y0 + 'px')
-            .style('width',  d => Math.max(0, d.x1 - d.x0) + 'px')
+            .style('width', d => Math.max(0, d.x1 - d.x0) + 'px')
             .style('height', d => Math.max(0, d.y1 - d.y0) + 'px')
             .style('background', (d,i) => color(i))
-            .style('border-radius','6px')
-            .style('overflow','hidden')
-            .style('cursor','pointer')
-            .style('opacity',.9)
+            .style('border-radius', '6px')
+            .style('overflow', 'hidden')
+            .style('cursor', 'pointer')
+            .style('opacity',.85)
+            .on('mouseover', function(){ d3.select(this).style('opacity',1); })
+            .on('mouseout',  function(){ d3.select(this).style('opacity',.85); })
             .on('click', (e,d) => {
               window.location.href = '{{ site.baseurl | default: "" }}/categories/' + d.data.name + '/';
             });
@@ -128,7 +138,7 @@
         nodes.append('span')
           .style('display','block')
           .style('padding','6px')
-          .style('font-size','0.8rem')
+          .style('font-size','0.85rem')
           .style('color','#000')
           .style('font-weight','600')
           .style('line-height','1.2')
