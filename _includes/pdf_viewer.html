@@ -1,0 +1,8 @@
+{% assign pdf_path = include.src | url_encode %}
+<iframe
+  class="pdf-viewer"
+  src="/assets/pdfjs/web/viewer.html?file={{ pdf_path }}#zoom=page-width"
+  style="width:100%;height:85vh;border:0"
+  loading="lazy"
+  referrerpolicy="no-referrer"
+></iframe>
